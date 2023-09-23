@@ -66,4 +66,24 @@ async def get_train_schedules(token: str = Depends(get_authorization_token)):
         ),
     )
 
-# DONE.
+@app.get("/trains/{num}", response_model=list[TrainInfo])
+async def get_train(num:str,token: str = Depends(get_authorization_token)):
+    headers = {"Authorization": f"Bearer {token}"}
+    print(token)
+    response = requests.get("http://20.244.56.144/train/trains", headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to fetch train data")
+    train_data = response.json()
+    # print(train_data)
+    l = []
+    for train in train_data:
+        if train["trainNumber"] == num :
+            l.append({
+    "trainName": train["trainName"],
+    "trainNumber": train["trainNumber"],
+    "departureTime": train["departureTime"],
+    "seatsAvailable": train["seatsAvailable"],
+    "price": train["price"],
+    "delayedBy": train["delayedBy"]
+  })
+    return l
